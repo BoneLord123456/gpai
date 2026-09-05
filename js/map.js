@@ -13,12 +13,11 @@
 
 const CARTO_API_KEY = 'cb1_2y3y_1_caf14144215e793174fb78b4';
 const TILE_LIGHT =
-  `https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`;
+  `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${CARTO_API_KEY}`;
 
-const TILE_DARK =
-  `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`;
-  const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
-
+const TILE_ATTR =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors ' +
+  '&copy; <a href="https://carto.com/attributions">CARTO</a>';
   const MapController = {
     map: null,
     tileLayer: null,
@@ -60,20 +59,18 @@ const TILE_DARK =
     },
 
     updateTileLayer() {
-      if (!this.map) return;
-      const isDark = window.ThemeManager ? window.ThemeManager.isDark() : false;
-      const targetUrl = isDark ? TILE_DARK : TILE_LIGHT;
+  if (!this.map) return;
 
-      if (this.tileLayer) {
-        this.map.removeLayer(this.tileLayer);
-      }
+  if (this.tileLayer) {
+    this.map.removeLayer(this.tileLayer);
+  }
 
-      this.tileLayer = L.tileLayer(targetUrl, {
-        attribution: TILE_ATTR,
-        maxZoom: 19,
-        subdomains: 'abcd'
-      }).addTo(this.map);
-    },
+  this.tileLayer = L.tileLayer(TILE_LIGHT, {
+    attribution: TILE_ATTR,
+    maxZoom: 20,
+    subdomains: 'abcd'
+  }).addTo(this.map);
+},
 
     /**
      * Populate location markers
