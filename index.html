@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse | Meghalaya Environmental Telemetry</title>
+    <meta name="description" content="Environmental monitoring and analytics platform for Meghalaya, tracking microclimates, air quality, and the Eco-Metric Score (EMS)." />
+    <meta property="og:title" content="GreenPulse | Meghalaya Environmental Telemetry" />
+    <meta property="og:description" content="Environmental monitoring and analytics platform for Meghalaya, tracking microclimates, air quality, and the Eco-Metric Score (EMS)." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Application Modular Stylesheets -->
+    <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/dashboard.css" />
+    <link rel="stylesheet" href="/css/analytics.css" />
+    <link rel="stylesheet" href="/css/responsive.css" />
+  </head>
+  <body>
+    <div class="app-container" id="app-root">
+      
+      <!-- ==========================================
+           PERSISTENT SIDEBAR NAVIGATION
+           ========================================== -->
+      <aside class="app-sidebar" id="app-sidebar" aria-label="Main Navigation">
+        <div class="sidebar-top">
+          <div class="sidebar-brand-wrapper" id="sidebar-brand-box">
+            <a href="#dashboard" class="brand-logo" id="brand-logo-link">
+              <div class="brand-icon-box" id="brand-icon-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                </svg>
+              </div>
+              <div>
+                <span class="brand-title">GreenPulse</span>
+                <span class="brand-badge">ML</span>
+              </div>
+            </a>
+            <button type="button" class="sidebar-close-btn" id="mobile-drawer-close" aria-label="Close Sidebar Menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <nav class="sidebar-nav-section" id="sidebar-nav">
+            <span class="nav-category-label">Monitoring Views</span>
+            <a href="#dashboard" class="nav-item is-active" data-view="dashboard" id="nav-item-dashboard">
+              <span class="nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="7" height="9" x="3" y="3" rx="1"/>
+                  <rect width="7" height="5" x="14" y="3" rx="1"/>
+                  <rect width="7" height="9" x="14" y="12" rx="1"/>
+                  <rect width="7" height="5" x="3" y="16" rx="1"/>
+                </svg>
+              </span>
+              <span>Dashboard</span>
+            </a>
+            <a href="#analytics" class="nav-item" data-view="analytics" id="nav-item-analytics">
+              <span class="nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"/>
+                  <line x1="12" y1="20" x2="12" y2="4"/>
+                  <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+              </span>
+              <span>Analytics</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="sidebar-footer" id="sidebar-footer">
+          <!-- Live Telemetry Status Widget -->
+          <div class="system-status-card" id="system-status-card">
+            <div class="system-status-top">
+              <span class="status-dot-pulse"></span>
+              <span>Telemetry Online</span>
+            </div>
+            <p class="system-status-meta">56 Sensors Active • 8 Nodes</p>
+          </div>
+
+          <!-- Light/Dark Mode Switcher -->
+          <button type="button" class="theme-toggle-btn js-theme-toggle" id="btn-theme-toggle" aria-label="Toggle Theme">
+            <div class="theme-btn-content">
+              <!-- Sun Icon for Dark Mode -->
+              <svg class="theme-icon-sun hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2"></path>
+                <path d="M12 20v2"></path>
+                <path d="m4.93 4.93 1.41 1.41"></path>
+                <path d="m17.66 17.66 1.41 1.41"></path>
+                <path d="M2 12h2"></path>
+                <path d="M20 12h2"></path>
+                <path d="m6.34 17.66-1.41 1.41"></path>
+                <path d="m19.07 4.93-1.41 1.41"></path>
+              </svg>
+              <!-- Moon Icon for Light Mode -->
+              <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+              </svg>
+              <span class="theme-toggle-label">Dark Mode</span>
+            </div>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Mobile Backdrop Overlay -->
+      <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+      <!-- ==========================================
+           MAIN APPLICATION SHELL
+           ========================================== -->
+      <div class="app-main" id="app-main-content">
+        
+        <!-- Sticky Header / Topbar -->
+        <header class="app-topbar" id="app-topbar">
+          <div class="topbar-left">
+            <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open Navigation Menu">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+                <line x1="4" x2="20" y1="6" y2="6"></line>
+                <line x1="4" x2="20" y1="18" y2="18"></line>
+              </svg>
+            </button>
+            <div class="topbar-breadcrumbs">
+              <div class="breadcrumb-subrow">
+                <span class="breadcrumb-root">Meghalaya</span>
+                <span class="breadcrumb-separator">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </span>
+                <span class="breadcrumb-current" id="topbar-district">East Khasi Hills</span>
+              </div>
+              <h1 class="topbar-title" id="topbar-view-title">Shillong: Ward's Lake District</h1>
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <div class="live-badge" id="live-status-pill">
+              <span class="status-dot-pulse"></span>
+              <span>LIVE</span>
+            </div>
+
+            <div class="topbar-refreshed-box">
+              <span class="topbar-refreshed-label">Last Refreshed</span>
+              <span class="topbar-refreshed-time font-mono" id="topbar-live-clock">--:--:-- IST</span>
+            </div>
+
+            <button type="button" class="btn btn-outline" id="btn-topbar-refresh" aria-label="Refresh Telemetry">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Viewport Container -->
+        <main class="view-viewport" id="view-viewport">
+
+          <!-- ==========================================
+               VIEW 1: REGIONAL DASHBOARD
+               ========================================== -->
+          <section class="app-view is-active-view" id="view-dashboard" aria-label="Dashboard View">
+            <header class="dashboard-view-header">
+              <div class="dashboard-title-group">
+                <h1>Regional Environmental Telemetry</h1>
+                <p>Real-time microclimate observations across monitored Meghalaya nodes</p>
+              </div>
+
+              <div class="dashboard-header-actions">
+                <div class="station-dropdown-wrapper">
+                  <label for="location-dropdown" class="station-dropdown-label">Station:</label>
+                  <select id="location-dropdown" class="form-select" aria-label="Select Monitored Station">
+                    <!-- Options populated dynamically from DataService -->
+                  </select>
+                </div>
+                <button type="button" class="btn btn-outline" id="btn-reset-map">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                  </svg>
+                  <span>Reset Map</span>
+                </button>
+              </div>
+            </header>
+
+            <div class="dashboard-grid">
+              
+              <!-- Left Column: Interactive Map & EMS Trend -->
+              <div class="dashboard-left-col">
+                
+                <!-- Leaflet Map Card -->
+                <div class="card map-card" id="card-map-wrapper">
+                  <div class="card-header">
+                    <div class="card-header-left">
+                      <h2 class="card-title">Regional Environmental Map</h2>
+                      <p class="card-subtitle">Monitored ecological stations across East Khasi Hills plateau</p>
+                    </div>
+                    <div class="header-badges-row" style="display: flex; gap: 8px;">
+                      <span class="status-badge status-excellent" id="map-header-aqi">AQI: Optimal</span>
+                      <span class="status-badge status-good" id="map-header-temp">Temp: 21.4°C</span>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="leaflet-container-wrapper" id="leaflet-map" role="region" aria-label="Interactive Map of Meghalaya Monitoring Stations"></div>
+                    <div class="map-floating-overlay" id="map-floating-badge">
+                      <span class="status-dot-pulse"></span>
+                      <span>8 Active Sensor Nodes</span>
+                    </div>
+                  </div>
+                  <div class="map-card-footer">
+                    <span>Click any pin marker to inspect environmental metrics</span>
+                    <div class="legend-items">
+                      <div class="legend-item">
+                        <span class="legend-dot is-green"></span>
+                        <span>Optimal (EMS 80+)</span>
+                      </div>
+                      <div class="legend-item">
+                        <span class="legend-dot is-amber"></span>
+                        <span>Advisory (EMS &lt; 70)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Station Quick-Select Strip -->
+                <div class="card station-quick-card" id="card-station-quick">
+                  <div class="card-header">
+                    <div class="card-header-left">
+                      <h2 class="card-title">Station Quick Selector</h2>
+                      <p class="card-subtitle">Real-time composite Eco-Metric Score by station</p>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="station-quick-list" id="station-quick-list">
+                      <!-- Cards populated dynamically -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Historical 24-Hour EMS Trend Line Chart -->
+                <div class="card" id="card-ems-chart">
+                  <div class="card-header">
+                    <div class="card-header-left">
+                      <h2 class="card-title">24-Hour Eco-Metric Score (EMS) Trend</h2>
+                      <p class="card-subtitle">Continuous diurnal ecological stability index</p>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container-240">
+                      <canvas id="chart-ems-trend"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right Column: Selected Station Inspector -->
+              <div class="dashboard-right-col">
+                <div class="card inspector-card" id="card-station-inspector">
+                  <div class="card-body">
+                    
+                    <!-- Station Header -->
+                    <div class="inspector-station-header">
+                      <div class="station-identity-box">
+                        <h2 id="selected-station-name">Ward's Lake</h2>
+                        <div class="station-badge-row">
+                          <span class="code-pill" id="selected-station-code">GP-EKB-01</span>
+                          <span class="category-tag" id="selected-station-category">Public Eco-Park &amp; Water Basin</span>
+                        </div>
+                      </div>
+                      <span class="status-badge status-excellent" id="selected-station-status-badge">Optimal Ecosystem</span>
+                    </div>
+
+                    <p class="station-description-text" id="selected-station-desc">
+                      Historic horseshoe-shaped artificial lake enveloped by lush botanical gardens, pine groves, and walking trails.
+                    </p>
+
+                    <!-- Prominent Eco-Metric Score (EMS) Banner -->
+                    <div class="ems-banner" id="ems-highlight-banner">
+                      <div class="ems-gauge-wrapper">
+                        <svg class="ems-gauge-svg" viewBox="0 0 96 96">
+                          <circle class="ems-gauge-track" cx="48" cy="48" r="42" />
+                          <circle class="ems-gauge-fill" id="ems-gauge-circle" cx="48" cy="48" r="42" />
+                        </svg>
+                        <div class="ems-gauge-center">
+                          <span class="ems-gauge-number font-mono" id="ems-score-value">88</span>
+                          <span class="ems-gauge-max">/ 100</span>
+                        </div>
+                      </div>
+                      <div class="ems-banner-info">
+                        <span class="ems-banner-label">Eco-Metric Score (EMS)</span>
+                        <h3 class="ems-banner-title" id="ems-banner-title">The environment is currently thriving</h3>
+                        <p class="ems-banner-desc" id="ems-banner-desc">All primary indicators are within safe thresholds.</p>
+                        <div class="ems-progress-track">
+                          <div class="ems-progress-fill" id="ems-progress-fill" style="width: 88%;"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Environmental Sensor Grid -->
+                    <h3 class="sensor-section-heading">Current Telemetry Readings</h3>
+                    <div class="sensors-grid" id="sensors-metric-grid">
+                      
+                      <!-- Temperature -->
+                      <div class="sensor-cell" id="cell-temp">
+                        <div class="sensor-cell-header">
+                          <span>Temperature</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-temp">20.4°C</span>
+                        <span class="sensor-cell-sub">Elev. <span id="selected-station-elevation">1,496 m</span></span>
+                      </div>
+
+                      <!-- Relative Humidity -->
+                      <div class="sensor-cell" id="cell-humidity">
+                        <div class="sensor-cell-header">
+                          <span>Relative Humidity</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-humidity">78%</span>
+                        <span class="sensor-cell-sub">Subtropical highland air</span>
+                      </div>
+
+                      <!-- Air Quality -->
+                      <div class="sensor-cell" id="cell-airquality">
+                        <div class="sensor-cell-header">
+                          <span>Air Quality Score</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
+                            <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
+                            <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-airquality">88 / 100</span>
+                        <span class="sensor-cell-sub" id="val-aqi-sub">AQI 28 • PM2.5 11.2 µg/m³</span>
+                      </div>
+
+                      <!-- Soil Moisture -->
+                      <div class="sensor-cell" id="cell-soil">
+                        <div class="sensor-cell-header">
+                          <span>Soil Moisture</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-soil">84 / 100</span>
+                        <span class="sensor-cell-sub">Humus organic topsoil</span>
+                      </div>
+
+                      <!-- Acoustic Noise -->
+                      <div class="sensor-cell" id="cell-noise">
+                        <div class="sensor-cell-header">
+                          <span>Acoustic Noise</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-noise">46 dB</span>
+                        <span class="sensor-cell-sub">Quiet Ambient Park</span>
+                      </div>
+
+                      <!-- Ambient Light -->
+                      <div class="sensor-cell" id="cell-light">
+                        <div class="sensor-cell-header">
+                          <span>Ambient Solar Light</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-light">68 / 100</span>
+                        <span class="sensor-cell-sub">Pine canopy filtered</span>
+                      </div>
+
+                      <!-- Crowd Footprint Density -->
+                      <div class="sensor-cell" id="cell-crowd">
+                        <div class="sensor-cell-header">
+                          <span>Crowd Footprint</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-crowd">42 / 100</span>
+                        <span class="sensor-cell-sub">Moderate leisure traffic</span>
+                      </div>
+
+                      <!-- CO2 Concentration -->
+                      <div class="sensor-cell" id="cell-co2">
+                        <div class="sensor-cell-header">
+                          <span>CO2 Concentration</span>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                          </svg>
+                        </div>
+                        <span class="sensor-cell-value" id="val-co2">412 ppm</span>
+                        <span class="sensor-cell-sub">Normal background atmospheric</span>
+                      </div>
+
+                    </div>
+
+                    <!-- Microclimate Observations List -->
+                    <div class="insights-box">
+                      <h3 class="insights-box-title">Microclimate Observations</h3>
+                      <ul class="insights-list" id="selected-station-insights">
+                        <!-- Populated dynamically -->
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ==========================================
+               VIEW 2: REGIONAL ANALYTICS
+               ========================================== -->
+          <section class="app-view hidden" id="view-analytics" aria-label="Analytics View">
+            <header class="analytics-view-header">
+              <div class="analytics-title-group">
+                <h1>Regional Telemetry Analytics</h1>
+                <p>Comparative ecological diagnostics, rankings, and anomaly detection</p>
+              </div>
+            </header>
+
+            <!-- KPI Summary Cards -->
+            <div class="kpi-grid" id="analytics-kpi-grid">
+              
+              <div class="kpi-card highlight-green" id="kpi-card-avg-ems">
+                <span class="kpi-label">Regional Average EMS</span>
+                <span class="kpi-value font-mono" id="kpi-avg-ems">--</span>
+                <span class="kpi-sub">Composite health across 8 stations</span>
+              </div>
+
+              <div class="kpi-card" id="kpi-card-best">
+                <span class="kpi-label">Highest Ecological Score</span>
+                <span class="kpi-value" id="kpi-best-location">--</span>
+                <span class="kpi-sub" id="kpi-best-sub">--</span>
+              </div>
+
+              <div class="kpi-card" id="kpi-card-worst">
+                <span class="kpi-label">High Anthropogenic Stress</span>
+                <span class="kpi-value" id="kpi-worst-location">--</span>
+                <span class="kpi-sub" id="kpi-worst-sub">--</span>
+              </div>
+
+              <div class="kpi-card" id="kpi-card-temp">
+                <span class="kpi-label">Average Microclimate</span>
+                <span class="kpi-value font-mono" id="kpi-avg-temp">--</span>
+                <span class="kpi-sub" id="kpi-avg-temp-sub">--</span>
+              </div>
+
+            </div>
+
+            <!-- Charts Row 1: 7-Day Regional Trend + Comparative Bar -->
+            <div class="analytics-charts-grid">
+              
+              <!-- 7-Day Historical Regional Aggregate -->
+              <div class="card" id="card-regional-trend">
+                <div class="card-header">
+                  <div class="card-header-left">
+                    <h2 class="card-title">7-Day Regional EMS &amp; Temperature Trend</h2>
+                    <p class="card-subtitle">Plateau-wide moving environmental indicators</p>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="chart-container-300">
+                    <canvas id="chart-regional-trend"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comparative Location Bar Chart -->
+              <div class="card" id="card-location-comparison">
+                <div class="card-header">
+                  <div class="card-header-left">
+                    <h2 class="card-title">Cross-Location EMS Comparison</h2>
+                    <p class="card-subtitle">Ranked by Eco-Metric Score across monitored sites</p>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="chart-container-300">
+                    <canvas id="chart-location-comparison"></canvas>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Multi-Sensor Parameter Radar Chart -->
+            <div class="card ranking-table-card radar-chart-card" id="card-sensor-radar">
+              <div class="card-header">
+                <div class="card-header-left">
+                  <h2 class="card-title">Multi-Sensor Parameter Diagnostic</h2>
+                  <p class="card-subtitle">Normalized 6-axis ecological fingerprint vs regional average</p>
+                </div>
+                <div class="radar-header-controls">
+                  <select id="radar-location-select" class="form-select" aria-label="Select Station for Radar Analysis">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="chart-container-300">
+                  <canvas id="chart-sensor-radar"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Location Ecological Ranking Table -->
+            <div class="card ranking-table-card" id="card-ranking-table">
+              <div class="card-header">
+                <div class="card-header-left">
+                  <h2 class="card-title">Regional Ecological Rankings</h2>
+                  <p class="card-subtitle">Detailed sensor parameters for all active monitoring nodes</p>
+                </div>
+                <div class="table-search-box">
+                  <input type="text" id="table-search-input" class="form-input" placeholder="Search station or code..." aria-label="Filter locations table" />
+                </div>
+              </div>
+              <div class="card-body" style="padding: 0;">
+                <div class="table-responsive-wrapper">
+                  <table class="ranking-table" aria-label="Locations Ranking Table">
+                    <thead>
+                      <tr>
+                        <th class="table-cell-rank">#</th>
+                        <th>Location &amp; Station Code</th>
+                        <th>EMS Index</th>
+                        <th>Health Status</th>
+                        <th>Temperature</th>
+                        <th>Air Quality</th>
+                        <th>Acoustics</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ranking-table-body">
+                      <!-- Populated dynamically by AnalyticsController -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Derived Environmental Observations / Anomaly Cards -->
+            <div class="card" id="card-insights">
+              <div class="card-header">
+                <div class="card-header-left">
+                  <h2 class="card-title">Derived Environmental Insights &amp; Observations</h2>
+                  <p class="card-subtitle">Algorithmic microclimate anomalies and ecological findings</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="insights-grid" id="insights-grid-container">
+                  <!-- Generated dynamically from AnalyticsController -->
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Application Modular Scripts -->
+    <script src="/js/demo-data.js"></script>
+    <script src="/js/data-service.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/map.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/analytics.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>
+
+
